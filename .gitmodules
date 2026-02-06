@@ -1,0 +1,6 @@
+[submodule "refuge-chat"]
+	path = refuge-chat
+	url = https://github.com/Anchellon/refuge-chat.git
+[submodule "refuge-chat-api"]
+	path = refuge-chat-api
+	url = https://github.com/Anchellon/refuge-chat-api.git
