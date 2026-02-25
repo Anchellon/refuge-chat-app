@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./refuge-chat
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./refuge-chat-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:mypassword@postgres:5432/sheltertech
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama2
+    depends_on:
+      - postgres
+      - ollama
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: my-postgres
+    environment:
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: sheltertech
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    command: ["sh", "-c", "ollama serve & sleep 5 && ollama pull llama2 && wait"]
+
+volumes:
+  pgdata:
+  ollama_data:
